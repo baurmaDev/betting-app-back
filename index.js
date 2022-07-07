@@ -47,13 +47,13 @@ app.get("/games", async (req, res) => {
   res.send(result);
 })
 app.post("/create-game", async (req, res) => {
-    const { signerAddress,nickname,secondNickname,link,amount} = req.body;
+    const { signerAddress,nickname,secondNickname,amount} = req.body;
     const collection = client.db().collection("games");
     const response = await collection.insertOne({
         signerAddress,
         nickname,
         secondNickname,
-        link,
+        // link,
         amount
     })
     const result = {
