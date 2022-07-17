@@ -1,6 +1,10 @@
 var express = require('express');
 var Web3 = require('web3');
 const cors = require('cors');
+const socketio = require('socket.io');
+const http = require('http');
+const { addUser, removeUser, getUser,
+        getUsersInRoom } = require("./users");
 const {ObjectId,MongoClient} = require('mongodb')
 const Provider = require('@truffle/hdwallet-provider');
 const abi = require('./utils/Bet.json');
@@ -10,10 +14,12 @@ const uri = process.env.URI;
 const client = new MongoClient(uri);
 
 var app = express();
+const server = http.createServer(app);
+const io = socketio(server);
 app.use(cors());
 app.use(express.json());
 
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 5000;
 
 var SmartContractAddress = "0x5CBc5735309FB70767f3820d9E561F1b74133473";
 var SmartContractABI = abi.abi;
@@ -120,5 +126,48 @@ app.post("/api/withdraw/:roomId",async (req, res) => {
   
 })
 
-app.listen(port);
+  io.on("connection", (socket) => {
+    socket.on('join', ({ name, room }, callback) => {
+ 
+        const { error, user } = addUser(
+            { id: socket.id, name, room });
+ 
+        if (error) return callback(error);
+ 
+        // Emit will send message to the user
+        // who had joined
+        socket.emit('message', { user: 'admin', text:
+            `${user.name},
+            welcome to room ${user.room}.` });
+ 
+        // Broadcast will send message to everyone
+        // in the room except the joined user
+        socket.broadcast.to(user.room)
+            .emit('message', { user: "admin",
+            text: `${user.name}, has joined` });
+ 
+        socket.join(user.room);
+        
+        io.to(user.room).emit('roomData', {
+            room: user.room,
+            users: getUsersInRoom(user.room)
+        });
+        callback();
+    })
+    
+    socket.on('disconnect', () => {
+        const user = removeUser(socket.id);
+        if (user) {
+            io.to(user.room).emit('message',
+            { user: 'admin', text:
+            `${user.name} had left` });
+        }
+    })
+ 
+})
+
+server.listen(port, () => {
+  console.log('Server has started!');
+});
+// app.listen(port);
 console.log('listening on', port);
