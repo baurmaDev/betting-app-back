@@ -134,8 +134,7 @@ app.post("/api/withdraw/:roomId",async (req, res) => {
  
         if (error) return callback(error);
  
-        // Emit will send message to the user
-        // who had joined
+        
         socket.emit('message', { user: 'admin', text:
             `${user.name},
             welcome to room ${user.room}.` });
