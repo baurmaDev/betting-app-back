@@ -101,28 +101,45 @@ const sendData = async ({winner, bet}) => {
 }
 
 app.post("/api/withdraw/:roomId",async (req, res) => {
-  const { winner, amount } = req.body;
-  console.log(winner);
   const db = client.db("test");
   const collection = db.collection("games");
   const {roomId} = req.params;
   console.log("Find game room", roomId);
   const game = await collection.findOne({_id: ObjectId(roomId)});
-  console.log(game);
   if(game.over === true){
     res.send(`The money has been already sent to ${winner.substr(0, 7)} address` );
     console.log("The money has been already sent to the winner!");
   }
   else{
+    const {draw} = req.body;
+    if(draw){
+      console.log("Draw was detected")
+      const game = await collection.findOne({_id: ObjectId(roomId)});
+      const updated = await collection.updateOne({_id: ObjectId(roomId)}, {
+        $set: {over: true}
+      })
+      const {firstAddress, secondAddress, amount} = req.body;
+      let winner = firstAddress;
+      const bet = amount;
+      await sendData({winner, bet});
+      winner = secondAddress;
+      await sendData({winner, bet});
+      res.send("Ether was returned to balances");
+    }else{
+      const { winner, amount } = req.body;
+      const bet = amount - (amount * 0.1);
+      const updated = await collection.updateOne({_id: ObjectId(roomId)}, {
+        $set: {over: true}
+      })
+      console.log(winner, bet);
+      await sendData({winner, bet});
+      res.send("Cash was delivered!")
+    }
     
-    const bet = amount - (amount * 0.1);
-    const updated = await collection.updateOne({_id: ObjectId(roomId)}, {
-      $set: {over: true}
-    })
-    console.log(winner, bet);
-    await sendData({winner, bet});
-    res.send("Cash was delivered!")
   }
+  
+  console.log(winner);
+  
   
 })
 
