@@ -112,9 +112,9 @@ app.post("/api/withdraw/:roomId",async (req, res) => {
   }
   else{
     const {draw} = req.body;
+    console.log("Draw", draw);
     if(draw){
       console.log("Draw was detected")
-      const game = await collection.findOne({_id: ObjectId(roomId)});
       const updated = await collection.updateOne({_id: ObjectId(roomId)}, {
         $set: {over: true}
       })
@@ -124,6 +124,7 @@ app.post("/api/withdraw/:roomId",async (req, res) => {
       await sendData({winner, bet});
       winner = secondAddress;
       await sendData({winner, bet});
+
       res.send("Ether was returned to balances");
     }else{
       const { winner, amount } = req.body;
