@@ -110,7 +110,7 @@ app.post("/api/withdraw/:roomId",async (req, res) => {
     res.send(`The money has been already sent to ${winner.substr(0, 7)} address` );
     console.log("The money has been already sent to the winner!");
   }
-  else{
+  else if(game.over === false){
     const {draw} = req.body;
     console.log("Draw", draw);
     if(draw){
