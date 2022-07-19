@@ -101,18 +101,26 @@ const sendData = async ({winner, bet}) => {
 }
 
 app.post("/api/withdraw/:roomId",async (req, res) => {
+
   const db = client.db("test");
   const collection = db.collection("games");
   const {roomId} = req.params;
   console.log("Find game room", roomId);
   const game = await collection.findOne({_id: ObjectId(roomId)});
+  console.log("AAAAAAAAAAAAAAAA");
+  console.log('Game info: ', game);
   if(game.over === true){
-    res.send(`The money has been already sent to ${winner.substr(0, 7)} address` );
     console.log("The money has been already sent to the winner!");
+    const {firstAddress, secondAddress} = req.body;
+    const { winner} = req.body;
+    if(firstAddress && secondAddress) res.send(`The money has been already sent to wallet addresses`);
+    if(winner) res.send(`The money has been already sent to ${winner.substr(0, 7)} address` );
+    
   }
   else if(game.over === false){
+    console.log("ROOM NOT OVER");
     const {draw} = req.body;
-    console.log("Draw", draw);
+    console.log("Draw: ", draw);
     if(draw){
       console.log("Draw was detected")
       const updated = await collection.updateOne({_id: ObjectId(roomId)}, {
@@ -127,6 +135,7 @@ app.post("/api/withdraw/:roomId",async (req, res) => {
 
       res.send("Ether was returned to balances");
     }else{
+      console.log("Send money to winner");
       const { winner, amount } = req.body;
       const bet = amount - (amount * 0.1);
       const updated = await collection.updateOne({_id: ObjectId(roomId)}, {
@@ -138,9 +147,6 @@ app.post("/api/withdraw/:roomId",async (req, res) => {
     }
     
   }
-  
-  console.log(winner);
-  
   
 })
 
