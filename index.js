@@ -107,7 +107,6 @@ app.post("/api/withdraw/:roomId",async (req, res) => {
   const {roomId} = req.params;
   console.log("Find game room", roomId);
   const game = await collection.findOne({_id: ObjectId(roomId)});
-  console.log("AAAAAAAAAAAAAAAA");
   console.log('Game info: ', game);
   if(game.over === true){
     console.log("The money has been already sent to the winner!");
