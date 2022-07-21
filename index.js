@@ -17,6 +17,7 @@ var app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 app.use(cors());
+
 app.use(express.json());
 
 var port = process.env.PORT || 5000;
@@ -60,7 +61,7 @@ app.post("/api/create-game", async (req, res) => {
     const response = await collection.insertOne({
         signerAddress,
         nickname,
-        secondNickname,
+        // secondNickname,
         amount, 
         over
     })
@@ -70,13 +71,13 @@ app.post("/api/create-game", async (req, res) => {
     res.send(result);
 })
 app.post("/api/lobby/:roomId", async (req,res) => {
-  const { secondSigner } = req.body;
+  const { secondSigner, secondNickname } = req.body;
   const {roomId } = req.params;
   const collection = client.db().collection("games");
 
   console.log(secondSigner)
   const updated = await collection.updateOne({_id: ObjectId(roomId)}, {
-    $set: {secondSigner: secondSigner}
+    $set: {secondSigner: secondSigner, secondNickname: secondNickname}
   })
   res.send("Updated");
 })
@@ -176,7 +177,17 @@ app.post("/api/withdraw/:roomId",async (req, res) => {
         });
         callback();
     })
-    
+    // socket.on('draw', () => {
+    //   const user = getUser(socket.id);
+    //   // io.to(user.room).emit('message', {
+    //   //   over: true
+    //   // })
+    //   socket.broadcast.to(user.room)
+    //         .emit('status', {
+    //           over:true
+    //         });
+      
+    // })
     socket.on('disconnect', () => {
         const user = removeUser(socket.id);
         if (user) {
