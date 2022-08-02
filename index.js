@@ -23,12 +23,14 @@ app.use(express.json());
 var port = process.env.PORT || 5000;
 
 // var SmartContractAddress = "0x5CBc5735309FB70767f3820d9E561F1b74133473";
-var SmartContractAddress = "0x583BfFcff11067F1E3783153a6009290E384b828";
+// var SmartContractAddress = "0x38Ec1CD975f53a65BC5f50Dd13736D91d1F510bD"; Mumbai
+var SmartContractAddress = "0x18388824B483D28CC0B85467f1F89d1b9c6bAa8E";
 var SmartContractABI = abi.abi;
-var address = "0xE0Fe66A6b176fe90BF9f9178068de2Cf45944f8d"
+// var address = "0xE266581a16482083AF6FE4C6cf5a00AE8437b86e"; Mumbai
+var address = "0xE0Fe66A6b176fe90BF9f9178068de2Cf45944f8d";
 var privatekey = process.env.PRIVATE_KEY;
-var rpcurl = "https://polygon-mumbai.infura.io/v3/17bf0515a7b341c69b5010fee943b4c8";
-// var rpcurl = "wss://rinkeby.infura.io/ws/v3/17bf0515a7b341c69b5010fee943b4c8";
+// var rpcurl = "https://polygon-mumbai.infura.io/v3/17bf0515a7b341c69b5010fee943b4c8";
+var rpcurl = "wss://rinkeby.infura.io/ws/v3/17bf0515a7b341c69b5010fee943b4c8";
 
 client
   .connect()
@@ -93,7 +95,7 @@ const sendData = async ({winner, bet}) => {
     console.log("Winner: ", winner);
     console.log("Bet amount: ", bet);
     console.log("Before withdraw called: ");
-    var receipt = await myContract.methods.payment(winner, Web3.utils.toWei(String(bet), 'ether')).send({ from: address });
+    var receipt = await myContract.methods.payment(winner, Web3.utils.toWei(String(bet), 'ether')).send({ from: address});
 
     console.log("After withdraw called: ");
     
@@ -200,7 +202,6 @@ app.post("/api/withdraw/:roomId",async (req, res) => {
     })
  
 })
-
 server.listen(port, () => {
   console.log('Server has started!');
 });
